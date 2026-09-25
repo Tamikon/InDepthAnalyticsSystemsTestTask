@@ -19,16 +19,28 @@ services:
 
   # pgAdmin
   pgadmin:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4:8.14
     container_name: testapi-pgadmin
+    user: root
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        cp /pgpass_ro /tmp/pgpass
+        chmod 600 /tmp/pgpass
+        exec /entrypoint.sh
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_UPGRADE_CHECK_ENABLED: "False"
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      PGADMIN_DISABLE_POSTFIX: "true"
     volumes:
       - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
-      - ./pgadmin/pgpass:/pgpass:ro
+      - ./pgadmin/pgpass:/pgpass_ro:ro
+      - ./pgadmin/config_local.py:/pgadmin4/config_local.py:ro
     ports:
       - "8080:80"
     depends_on:
